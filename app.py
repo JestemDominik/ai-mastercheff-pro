@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 from openai import OpenAI
 import base64
@@ -67,7 +68,7 @@ st.markdown("Twój osobisty kucharz, dietetyk i fotograf w jednym.")
 
 # Pasek boczny
 with st.sidebar:
-    api_key = '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'
+    
     st.header("🛡️ Safety First - Filtry")
     health_filters = st.multiselect(
         "Wybierz ograniczenia zdrowotne:",
@@ -76,7 +77,7 @@ with st.sidebar:
     st.info("AI dostosuje przepis i zaproponuje zamienniki dla wybranych filtrów.")
 
 
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Zakładki funkcjonalności
 tab1, tab2 = st.tabs(["📸 Skaner Lodówki & Gotowanie", "🕵️ Odtwórz to Danie"])
