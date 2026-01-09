@@ -3,6 +3,7 @@ import base64
 import streamlit as st
 from openai import OpenAI
 import fal_client
+import concurrent.futures
 
 os.environ["FAL_KEY"] = st.secrets["FAL_KEY"]
 
@@ -195,13 +196,25 @@ with tab1:
                         selected_dish = dish
 
             if selected_dish:
-                with st.spinner(f"Tworzę przepis: {selected_dish}..."):
-                    recipe = generate_full_recipe_logic(
+                st.info(f"👨‍🍳 Szef kuchni i fotograf pracują równocześnie nad: **{selected_dish}**...")
+                
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future_recipe = executor.submit(
+                        generate_full_recipe_logic, 
                         client, selected_dish, ingredients, diet_type, health_filters, people_count, mode
                     )
-                    st.session_state.final_recipe = recipe
-                    image_url = generate_dish_image(selected_dish)
-                    st.session_state.final_image = image_url
+                    
+                    future_image = executor.submit(
+                        generate_dish_image, 
+                        selected_dish
+                    )
+                    
+                    recipe = future_recipe.result()
+                    image_url = future_image.result()
+
+                st.session_state.final_recipe = recipe
+                st.session_state.final_image = image_url
+                st.rerun()
 
         if st.session_state.final_recipe:
             st.markdown("---")
