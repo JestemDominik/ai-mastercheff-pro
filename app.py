@@ -67,7 +67,7 @@ st.title("👨‍🍳 AI MasterCheff Pro")
 st.markdown("Twój osobisty kucharz, dietetyk i fotograf w jednym.")
 
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="xxxxxxxxxx")
 
 # Zakładki funkcjonalności
 tab1, tab2 = st.tabs(["📸 Skaner Lodówki & Gotowanie", "🕵️ Odtwórz to Danie"])
