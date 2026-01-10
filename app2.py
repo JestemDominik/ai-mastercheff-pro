@@ -28,11 +28,12 @@ def analyze_fridge_image(client, image_base64):
     )
     return response.choices[0].message.content
 
-def generate_suggestions_logic(client, ingredients, diet, filters, mode):
+def generate_suggestions_logic(client, ingredients, diet, filters, mode, occasion, time):
+
     prompt = (
         f"Jesteś kreatywnym szefem kuchni. Bazując na składnikach: {ingredients}, "
         f"diecie: {diet} oraz wykluczeniach: {', '.join(filters)}, "
-        f"zaproponuj 3 nazwy dań, które można z tego przygotować. "
+        f"zaproponuj 3 nazwy dań, które można z tego przygotować na {occasion} w czasie {time} minut"
         f"Tryb: {mode}. "
         "Wypisz TYLKO nazwy dań, oddzielone średnikiem (;). Nie dodawaj numeracji ani opisów."
     )
@@ -44,13 +45,13 @@ def generate_suggestions_logic(client, ingredients, diet, filters, mode):
     content = response.choices[0].message.content
     return [dish.strip() for dish in content.split(';') if dish.strip()]
 
-def generate_full_recipe_logic(client, dish_name, ingredients, diet, filters, people_count, mode):
+def generate_full_recipe_logic(client, dish_name, ingredients, diet, filters, people_count, mode, occasion, time):
     safety_instruction = f"Użytkownik ma filtry: {', '.join(filters)}. Jeśli składniki są szkodliwe, użyj bezpiecznych zamienników." if filters else ""
     buy_instruction = "Możesz zasugerować składniki do dokupienia." if mode == "Doradź co dokupić" else "Staraj się używać głównie podanych składników."
     
     full_prompt = (
-        f"Jesteś dietetykiem. Przygotuj szczegółowy przepis na danie: '{dish_name}'. "
-        f"Dieta: {diet}. Ilość osób: {people_count}. "
+        f"Jesteś dietetykiem i kucharzem z pasją znającym się na lokalnej kuchni i gotującym pyszne dania. Przygotuj szczegółowy przepis na danie: '{dish_name}'. "
+        f"Dieta: {diet}. Ilość osób: {people_count}. Ilość czasu na zrobienie {time} "
         f"Dostępne składniki: {ingredients}. {buy_instruction} {safety_instruction} "
         "Wymagany format odpowiedzi: "
         "1. Nazwa Dania (jako nagłówek). "
@@ -107,16 +108,16 @@ def generate_dish_image(recipe_title):
         st.error(f"Błąd generowania obrazu: {str(e)}")
         return "https://via.placeholder.com/1024?text=ERROR"
 
-def generate_random(time, occasion):
+# def generate_random(time, occasion):
     
-    full_prompt = (
-        f" Jesteś kucharzem z pasją. Przygotuj szczegółowy i przepis na {occasion}, zakładając że mam {time}, minut na gotowanie")
+#     full_prompt = (
+#         f" Jesteś kucharzem z pasją. Przygotuj szczegółowy i przepis na {occasion}, zakładając że mam {time}, minut na gotowanie")
 
-    response = client.chat.completions.create(
-        model="gpt-5-mini",
-        messages=[{"role": "user", "content": full_prompt}]
-    )
-    return response.choices[0].message.content
+#     response = client.chat.completions.create(
+#         model="gpt-5-mini",
+#         messages=[{"role": "user", "content": full_prompt}]
+#     )
+#     return response.choices[0].message.content
 
 st.title("👨‍🍳 AI MasterCheff Pro 2.0")
 st.markdown("Twój osobisty kucharz - wybierz dietę, zobacz propozycje i gotuj!")
@@ -166,6 +167,8 @@ with tab1:
         health_filters = st.multiselect("Wykluczenia zdrowotne:", ["Bezglutenowe", "Bez laktozy", "Cukrzyca (Niski IG)", "Lekkostrawne"])
         people_count = st.number_input("Ile osób?", 1, 10, 2)
         mode = st.radio("Tryb zakupów:", ("Tylko z tego co mam", "Doradź co dokupić"))
+        occasion = st.selectbox('Jaka okazja?', ['Śniadanie', 'Obiad', 'Kolacja', 'Impreza', 'Przekąska'])
+        time = st.slider("Ile masz minut?", 10, 120, 30)
 
         st.markdown("---")
         
@@ -177,7 +180,7 @@ with tab1:
                 st.session_state.final_image = None
                 
                 with st.spinner("Generuję propozycje..."):
-                    suggestions = generate_suggestions_logic(client, ingredients, diet_type, health_filters, mode)
+                    suggestions = generate_suggestions_logic(client, ingredients, diet_type, health_filters, mode, occasion, time)
                     st.session_state.dish_suggestions = suggestions
 
     with col2:
@@ -248,10 +251,3 @@ with tab2:
             result = generate_recipe_logic(client, prompt, image_base64=base64_dish)
             st.markdown(result)
 
-with tab3:
-    st.subheader("Wygeneuj losowy przepis")
-    time = st.slider("Ile masz minut?", 10, 120, 30)
-    occasion = st.selectbox('Jaka okazja?', ['Śniadanie', 'Obiad', 'Kolacja', 'Impreza', 'Przekąska'])
-    if st.button("💡 Stwórz danie"):
-        result1 = generate_random(time, occasion)
-        st.markdown(result1)

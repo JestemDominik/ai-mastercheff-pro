@@ -45,7 +45,7 @@ def generate_recipe_logic(client, instruction, image_base64=None):
         messages[1]["content"].append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}})
 
     response = client.chat.completions.create(
-        model="gpt-5.2",
+        model="gpt-5-mini",
         messages=messages
     )
     return response.choices[0].message.content
@@ -66,18 +66,8 @@ def generate_dish_image(client, recipe_title):
 st.title("👨‍🍳 AI MasterCheff Pro")
 st.markdown("Twój osobisty kucharz, dietetyk i fotograf w jednym.")
 
-# Pasek boczny
-with st.sidebar:
-    
-    st.header("🛡️ Safety First - Filtry")
-    health_filters = st.multiselect(
-        "Wybierz ograniczenia zdrowotne:",
-        ["Cukrzyca (Niski IG)", "Nietolerancja laktozy", "Bezglutenowe", "IBS (Low FODMAP)", "Wegańskie"]
-    )
-    st.info("AI dostosuje przepis i zaproponuje zamienniki dla wybranych filtrów.")
 
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key="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")
 
 # Zakładki funkcjonalności
 tab1, tab2 = st.tabs(["📸 Skaner Lodówki & Gotowanie", "🕵️ Odtwórz to Danie"])
@@ -108,7 +98,7 @@ with tab1:
             value=st.session_state.detected_ingredients,
             height=150
         )
-        
+        health_filters = st.multiselect("Wybierz ograniczenia zdrowotne:", ["Cukrzyca (Niski IG)", "Nietolerancja laktozy", "Bezglutenowe", "IBS (Low FODMAP)", "Wegańskie"])
         people_count = st.number_input("Ile osób?", 1, 10, 2)
         mode = st.radio("Tryb:", ("Tylko z tego co mam", "Doradź co dokupić"))
 
