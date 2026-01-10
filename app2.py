@@ -133,7 +133,7 @@ if 'final_recipe' not in st.session_state:
 if 'final_image' not in st.session_state:
     st.session_state.final_image = None
 
-tab1, tab2, tab3 = st.tabs(["📸 Skaner & Planer", "🕵️ Odtwórz Danie", "Zaskocz mnie!"])
+tab1, tab2 = st.tabs(["📸 Skaner & Planer", "🕵️ Odtwórz Danie"])
 
 with tab1:
     col1, col2 = st.columns([1, 1])
