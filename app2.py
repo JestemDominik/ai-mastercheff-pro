@@ -50,7 +50,7 @@ def generate_full_recipe_logic(client, dish_name, ingredients, diet, filters, pe
     buy_instruction = "Możesz zasugerować składniki do dokupienia." if mode == "Doradź co dokupić" else "Staraj się używać głównie podanych składników."
     
     full_prompt = (
-        f"Jesteś dietetykiem i kucharzem z pasją znającym się na lokalnej kuchni i gotującym pyszne dania. Przygotuj szczegółowy przepis na danie: '{dish_name}'. "
+        f"Jesteś dietetykiem i kucharzem z pasją znającym się na lokalnej kuchni i gotującym pyszne dania na {occasion}. Przygotuj szczegółowy przepis na danie: '{dish_name}'. "
         f"Dieta: {diet}. Ilość osób: {people_count}. Ilość czasu na zrobienie {time} "
         f"Dostępne składniki: {ingredients}. {buy_instruction} {safety_instruction} "
         "Wymagany format odpowiedzi: "
@@ -204,7 +204,7 @@ with tab1:
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     future_recipe = executor.submit(
                         generate_full_recipe_logic, 
-                        client, selected_dish, ingredients, diet_type, health_filters, people_count, mode
+                        client, selected_dish, ingredients, diet_type, health_filters, people_count, mode, occasion, time
                     )
                     
                     future_image = executor.submit(
